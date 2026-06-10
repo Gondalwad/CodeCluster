@@ -44,6 +44,9 @@
   }
 }
 
+.bg-indigo-950{
+      background-color: #16171d;
+}
 body {
   margin: 0;
   padding: 1px;
