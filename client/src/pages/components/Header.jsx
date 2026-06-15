@@ -1,4 +1,4 @@
-import { BrowserRouter, Link } from "react-router";
+import { Link } from "react-router-dom";
 import Button from "../ui/Button";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
@@ -12,7 +12,6 @@ export default function Header() {
 
   return (
     <>
-      <BrowserRouter>
         <nav className="flex justify-between p-2 shadow-2xl shadow-indigo-400  items-center rounded-lg">
           {/* nav icon in responsive screen like phone/tab */}
           
@@ -94,7 +93,6 @@ export default function Header() {
             </li>
           </ul>
         </nav>
-      </BrowserRouter>
     </>
   );
 }
