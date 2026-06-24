@@ -1,6 +1,35 @@
+import { useState } from 'react';
 import Button from "../../../components/ui/Button";
+import { CodeEditor, EditorToolbar } from './editor';
+
+const DEFAULT_CODE = {
+  javascript: '// Write your JavaScript solution here\nfunction solution() {\n  \n}',
+  python: '# Write your Python solution here\ndef solution():\n    pass',
+  java: '// Write your Java solution here\nclass Solution {\n    public void solution() {\n        \n    }\n}',
+  cpp: '// Write your C++ solution here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}',
+  c: '// Write your C solution here\n#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',
+  typescript: '// Write your TypeScript solution here\nfunction solution(): void {\n  \n}',
+  go: '// Write your Go solution here\npackage main\n\nfunc main() {\n    \n}',
+  rust: '// Write your Rust solution here\nfn main() {\n    \n}'
+};
 
 export default function ProblemContentContainer() {
+  const [language, setLanguage] = useState('javascript');
+  const [code, setCode] = useState(DEFAULT_CODE.javascript);
+
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+    setCode(DEFAULT_CODE[newLanguage] || '');
+  };
+
+  const handleCodeChange = (newCode) => {
+    setCode(newCode);
+  };
+
+  const handleReset = () => {
+    setCode(DEFAULT_CODE[language] || '');
+  };
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full overflow-hidden">
       {/* Problem Statement Section */}
@@ -31,22 +60,19 @@ export default function ProblemContentContainer() {
 
       {/* Code Editor & Test Cases Section */}
       <section className="border border-[var(--border)] rounded-lg bg-[var(--bg)] flex flex-col overflow-hidden">
-        <div className="border-b border-[var(--border)] p-3 bg-[var(--code-bg)] flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-[var(--text-h)]">
-            Code Editor
-          </h3>
-          <select className="px-3 py-1 rounded border border-[var(--border)] bg-[var(--bg)] text-[var(--text)] text-sm cursor-pointer">
-            <option>JavaScript</option>
-            <option>Python</option>
-            <option>Java</option>
-            <option>C++</option>
-          </select>
-        </div>
+        <EditorToolbar
+          language={language}
+          onLanguageChange={handleLanguageChange}
+          onReset={handleReset}
+        />
         
-        {/* Editor Placeholder */}
-        <div className="flex-1 bg-[var(--code-bg)] p-4 font-[var(--mono)] text-sm text-[var(--text)] overflow-y-auto">
-          <p>// Code editor will be integrated here</p>
-          <p>// User can write solution code</p>
+        {/* Monaco Code Editor */}
+        <div className="flex-1 overflow-hidden">
+          <CodeEditor
+            language={language}
+            value={code}
+            onChange={handleCodeChange}
+          />
         </div>
 
         {/* Test Cases & Submit Section */}
