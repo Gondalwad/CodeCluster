@@ -1,91 +1,86 @@
 import { useState } from 'react';
-import Button from "../../../components/ui/Button";
-import { CodeEditor, EditorToolbar } from './editor';
-
-const DEFAULT_CODE = {
-  javascript: '// Write your JavaScript solution here\nfunction solution() {\n  \n}',
-  python: '# Write your Python solution here\ndef solution():\n    pass',
-  java: '// Write your Java solution here\nclass Solution {\n    public void solution() {\n        \n    }\n}',
-  cpp: '// Write your C++ solution here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}',
-  c: '// Write your C solution here\n#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',
-  typescript: '// Write your TypeScript solution here\nfunction solution(): void {\n  \n}',
-  go: '// Write your Go solution here\npackage main\n\nfunc main() {\n    \n}',
-  rust: '// Write your Rust solution here\nfn main() {\n    \n}'
-};
+import ProblemSection from './ProblemSection';
+import EditorSection from './EditorSection';
+import ResizablePanel from './ResizablePanel';
+import ProblemDrawer from './ProblemDrawer';
+import ProblemSidebar from './ProblemSidebar';
 
 export default function ProblemContentContainer() {
-  const [language, setLanguage] = useState('javascript');
-  const [code, setCode] = useState(DEFAULT_CODE.javascript);
+  const [isProblemListOpen, setIsProblemListOpen] = useState(false);
 
-  const handleLanguageChange = (newLanguage) => {
-    setLanguage(newLanguage);
-    setCode(DEFAULT_CODE[newLanguage] || '');
-  };
+  // Left Pane - Problem Description
+  const leftPane = (
+    <ProblemSection
+      title="1. Two Sum"
+      difficulty="Easy"
+      acceptance="49.1%"
+      submissions="2.5M"
+      tags={['Array', 'Hash Table']}
+      description="Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order."
+      examples={[
+        {
+          input: 'nums = [2,7,11,15], target = 9',
+          output: '[0,1]',
+          explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].'
+        },
+        {
+          input: 'nums = [3,2,4], target = 6',
+          output: '[1,2]',
+          explanation: ''
+        },
+        {
+          input: 'nums = [3,3], target = 6',
+          output: '[0,1]',
+          explanation: ''
+        }
+      ]}
+      constraints={[
+        '2 <= nums.length <= 10⁴',
+        '-10⁹ <= nums[i] <= 10⁹',
+        '-10⁹ <= target <= 10⁹',
+        'Only one valid answer exists.'
+      ]}
+    />
+  );
 
-  const handleCodeChange = (newCode) => {
-    setCode(newCode);
-  };
-
-  const handleReset = () => {
-    setCode(DEFAULT_CODE[language] || '');
-  };
+  // Right Pane - Editor
+  const rightPane = (
+    <EditorSection
+      testCases={[
+        { input: 'nums = [2,7,11,15]\ntarget = 9', output: '[0,1]' },
+        { input: 'nums = [3,2,4]\ntarget = 6', output: '[1,2]' },
+        { input: 'nums = [3,3]\ntarget = 6', output: '[0,1]' }
+      ]}
+      onToggleProblemList={() => setIsProblemListOpen(true)}
+    />
+  );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full overflow-hidden">
-      {/* Problem Statement Section */}
-      <section className="border border-[var(--border)] rounded-lg bg-[var(--bg)] overflow-y-auto">
-        <div className="border-b border-[var(--border)] p-3 bg-[var(--code-bg)]">
-          <h3 className="text-lg font-semibold text-[var(--text-h)]">
-            Problem Statement
-          </h3>
-        </div>
-        <div className="p-4 text-[var(--text)]">
-          <p className="mb-4">Problem description will appear here.</p>
-          
-          <div className="mb-4">
-            <h4 className="font-semibold text-[var(--text-h)] mb-2">Examples:</h4>
-            <div className="bg-[var(--code-bg)] p-3 rounded border border-[var(--border)] font-[var(--mono)] text-sm">
-              <p>Example test cases will be displayed here.</p>
-            </div>
-          </div>
+    <>
+      {/* Sliding Drawer for Problem List */}
+      <ProblemDrawer isOpen={isProblemListOpen} onClose={() => setIsProblemListOpen(false)}>
+        <ProblemSidebar />
+      </ProblemDrawer>
 
-          <div className="mb-4">
-            <h4 className="font-semibold text-[var(--text-h)] mb-2">Constraints:</h4>
-            <ul className="list-disc list-inside text-sm space-y-1">
-              <li>Constraint items will be listed here</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Code Editor & Test Cases Section */}
-      <section className="border border-[var(--border)] rounded-lg bg-[var(--bg)] flex flex-col overflow-hidden">
-        <EditorToolbar
-          language={language}
-          onLanguageChange={handleLanguageChange}
-          onReset={handleReset}
-        />
-        
-        {/* Monaco Code Editor */}
-        <div className="flex-1 overflow-hidden">
-          <CodeEditor
-            language={language}
-            value={code}
-            onChange={handleCodeChange}
+      {/* Main Content */}
+      <div className="h-full">
+        {/* Desktop: 50/50 split */}
+        <div className="hidden lg:block h-full">
+          <ResizablePanel
+            left={leftPane}
+            right={rightPane}
+            defaultLeftWidth={50}
+            minLeftWidth={350}
+            minRightWidth={350}
           />
         </div>
 
-        {/* Test Cases & Submit Section */}
-        <div className="border-t border-[var(--border)] p-3 bg-[var(--code-bg)]">
-          <div className="flex gap-2 mb-3">
-            <Button value="Run Tests" className="bg-[var(--accent)] border-[var(--accent)]" />
-            <Button value="Submit" />
-          </div>
-          <div className="text-sm text-[var(--text)]">
-            <p>Test results will appear here.</p>
-          </div>
+        {/* Mobile: Stacked */}
+        <div className="lg:hidden flex flex-col gap-4 h-full overflow-auto p-4">
+          <div className="min-h-[400px]">{leftPane}</div>
+          <div className="min-h-[600px]">{rightPane}</div>
         </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }
