@@ -1,11 +1,9 @@
-import ProblemSidebar from "./components/ProblemSidebar";
-import ProblemWorkspace from "./components/ProblemWorkspace";
+import ProblemContentContainer from "./components/ProblemContentContainer";
 
 export default function ProblemSolving() {
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg)]">
-      <ProblemSidebar />
-      <ProblemWorkspace />
+    <div className="h-screen overflow-hidden bg-[var(--bg)]">
+      <ProblemContentContainer />
     </div>
   );
 }

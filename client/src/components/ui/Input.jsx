@@ -1,4 +1,4 @@
-export default function Input({ type, className, placeholder, value, onChange, name }) {
+export default function Input({ type = 'text', className, placeholder, value, onChange, name }) {
   return (
     <input
       type={type}
@@ -6,7 +6,7 @@ export default function Input({ type, className, placeholder, value, onChange, n
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      className={`rounded-lg bg-gray-800 placeholder:gray-500 px-3 py-0.5 outline-1 outline-indigo-300 ${className}`}
+      className={`rounded-lg bg-[var(--code-bg)] text-[var(--text)] placeholder:text-[var(--text)] placeholder:opacity-50 border border-[var(--border)] px-3 py-2 outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent ${className}`}
     />
   );
 }
