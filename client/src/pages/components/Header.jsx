@@ -1,7 +1,13 @@
+/*Created By - Sudarshan Gondalwad
+
+ This is header which includes options related to Home, About, Contact etc and sign in and signUP in option and 
+ if user is already signed up it provides profile options */
+
 import { BrowserRouter, Link } from "react-router";
 import Button from "../ui/Button";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
+import ProfileOrOptions from "./ProfileOrOptions";
 
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -12,8 +18,7 @@ export default function Header() {
 
   return (
     <>
-      <BrowserRouter>
-        <nav className="flex justify-between p-2 shadow-2xl shadow-indigo-400  items-center rounded-lg">
+        <nav className="flex justify-between p-2 ring-indigo-400 ring-1 shadow-2xs  shadow-indigo-400  items-center rounded-lg">
           {/* nav icon in responsive screen like phone/tab */}
           
           {isNavOpen ? (
@@ -63,17 +68,17 @@ export default function Header() {
             `}>
             <li className="hover:text-gray-200">
               <Link to="/">
-                <img src="../../public/codecluster-logo.png" className="w-8 shadow-xs" alt="png" />
+                <img src="/codecluster-logo.png" className="w-8 shadow-xs" alt="png" />
               </Link>
             </li>
             <li className="hover:text-gray-200 text-lg h-fit">
-              <Link to="/home">Home</Link>
+              <Link to="/">Home</Link>
             </li>
             <li className="hover:text-gray-200 text-lg h-fit">
               <Link to="/about">About</Link>
             </li>
             <li className="hover:text-gray-200 text-lg h-fit">
-              <Link to="/services">Services</Link>
+              <Link to="/service">Services</Link>
             </li>
             <li className="hover:text-gray-200 text-lg h-fit">
               <Link to="/contact">Contact Us</Link>
@@ -81,20 +86,8 @@ export default function Header() {
           </ul>
 
             {/* Second ul containing only buttons */}
-          <ul className="flex gap-3 h-fit">
-            <li>
-              <Link to="/signIn">
-                <Button value={"Sign In"} />
-              </Link>
-            </li>
-            <li>
-              <Link to="/signUp">
-                <Button value={"Sign Up"} className={"bg-transparent"} />
-              </Link>
-            </li>
-          </ul>
+          <ProfileOrOptions/>
         </nav>
-      </BrowserRouter>
     </>
   );
 }
