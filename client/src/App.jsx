@@ -1,22 +1,46 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Header from './components/layout/Header';
+import { useState } from 'react';
+
+// Pages
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Service from './pages/Service';
 import ProblemSolving from './pages/ProblemSolving';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import Profile from './pages/Profile';
+import Admin from './pages/Dashboards/Admin';
+
+// Components & Layouts
+import Header from './pages/components/Header';
+import Dashboard from './pages/components/Dashboard';
+import DashboardLayout from './pages/components/DashboardLayout';
 
 function App() {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/service" element={<Service />} />
         <Route path="/problems" element={<ProblemSolving />} />
+        
+        {/* Auth Routes */}
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        
+        {/* Dashboard & Profile Routes */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        {/* Note: Admin and DashboardLayout are imported but not currently utilized in these routes */}
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
