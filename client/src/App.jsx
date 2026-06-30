@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import DashboardLayout from './pages/components/DashboardLayout';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/components/Dashboard';
+import UploadQuestions from './pages/excel-to-json/UploadQuestions.jsx';
 
 function App() {
 
@@ -26,8 +27,9 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signin" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/profile" element={<Profile />} />\
-      </Routes>
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/upload" element={<UploadQuestions />} />
+      </Routes>  
     </>
   )
 }

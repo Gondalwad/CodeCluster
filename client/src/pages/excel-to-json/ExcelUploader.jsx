@@ -9,13 +9,14 @@ import React from 'react';
 
 import * as XLSX from 'xlsx';
 
-// import { parseExcel } from "../utils/excelToJson";
+import { ExcelToJson } from "./ExcelToJson.js"
 
 const ExcelUploader = ({ onDataParsed }) => {
-
+    console.log(onDataParsed);
     const handleFileUpload = async (e) => {
-
+        console.log("handleFileUpload called");
         const file = e.target.files[0];
+        console.log(file);
 
         if (!file) return;
 
@@ -27,8 +28,9 @@ const ExcelUploader = ({ onDataParsed }) => {
 
         try {
 
-            const jsonData = await parseExcel(file);
+            const jsonData = await ExcelToJson(file);
 
+            console.log(jsonData);
             // Send parsed data to parent
             onDataParsed(jsonData);
 
