@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import xlsx from 'xlsx';
+import * as XLSX from 'xlsx';
 
-import { parseExcel } from "../utils/excelToJson";
+// import { parseExcel } from "../utils/excelToJson";
 
 const ExcelUploader = ({ onDataParsed }) => {
 
@@ -44,6 +44,7 @@ const ExcelUploader = ({ onDataParsed }) => {
     return (
         <div>
             <input
+                className='block min-w-0 grow bg-gray-800 py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6 rounded-md'
                 type="file"
                 accept=".xlsx"
                 onChange={handleFileUpload}
