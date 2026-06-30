@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Button, CodeBlock } from '../../../../components/ui';
 
-export default function TestcaseSection() {
+export default function TestcaseSection({ testCases = [] }) {
   const [activeCase, setActiveCase] = useState(0);
 
-  const testCases = [
-    { input: 'nums = [2,7,11,15]\ntarget = 9', output: '[0,1]' },
-    { input: 'nums = [3,2,4]\ntarget = 6', output: '[1,2]' },
-    { input: 'nums = [3,3]\ntarget = 6', output: '[0,1]' }
-  ];
+  if (testCases.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <p className="text-sm text-[var(--text)] opacity-60">No test cases available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -19,17 +21,17 @@ export default function TestcaseSection() {
             key={index}
             value={`Case ${index + 1}`}
             onClick={() => setActiveCase(index)}
-            className={`!py-1.5 !px-4 text-sm whitespace-nowrap ${
+            className={`!py-2 !px-4 text-sm whitespace-nowrap font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
               activeCase === index
                 ? 'bg-[var(--accent)] border-[var(--accent)] text-white'
-                : 'bg-[var(--code-bg)] border-[var(--border)] text-[var(--text)] hover:bg-[var(--accent-bg)]'
+                : 'bg-[var(--code-bg)] border-[var(--border)] text-[var(--text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent)]'
             }`}
           />
         ))}
       </div>
 
       {/* Case Content */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-[var(--bg)]">
         <CodeBlock label="Input:">
           {testCases[activeCase]?.input || 'No input provided'}
         </CodeBlock>

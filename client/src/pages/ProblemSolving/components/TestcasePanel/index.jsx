@@ -4,7 +4,7 @@ import TestcaseSection from './TestcaseSection';
 import CustomInputSection from './CustomInputSection';
 import TestResultSection from './TestResultSection';
 
-export default function TestcasePanel({ isOpen = true, setIsOpen }) {
+export default function TestcasePanel({ isOpen = true, setIsOpen, testCases = [] }) {
   const [activeTab, setActiveTab] = useState('testcase');
 
   const tabs = [
@@ -16,9 +16,9 @@ export default function TestcasePanel({ isOpen = true, setIsOpen }) {
   if (!isOpen) return null;
 
   return (
-    <div className="h-full flex flex-col bg-[var(--bg)] overflow-hidden">
+    <div className="h-full flex flex-col bg-[var(--bg)] overflow-hidden shadow-sm">
       {/* Sticky Tab Header */}
-      <div className="flex items-center border-b border-[var(--border)] bg-[var(--code-bg)] sticky top-0 z-10">
+      <div className="flex items-center border-b border-[var(--border)] bg-[var(--code-bg)] sticky top-0 z-10 shadow-sm">
         {tabs.map((tab) => (
           <TabButton
             key={tab.id}
@@ -32,7 +32,7 @@ export default function TestcasePanel({ isOpen = true, setIsOpen }) {
 
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'testcase' && <TestcaseSection />}
+        {activeTab === 'testcase' && <TestcaseSection testCases={testCases} />}
         {activeTab === 'custom-input' && <CustomInputSection />}
         {activeTab === 'test-result' && <TestResultSection />}
       </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useResizable } from '../../../hooks/useResizable';
 
 export default function VerticalResizablePanel({ 
   top, 
@@ -7,54 +7,12 @@ export default function VerticalResizablePanel({
   minTopHeight = 200,
   minBottomHeight = 150
 }) {
-  const [topHeight, setTopHeight] = useState(defaultTopHeight);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef(null);
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isDragging || !containerRef.current) return;
-
-      const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const containerHeight = containerRect.height;
-      
-      // Calculate new height percentage
-      const newTopHeight = ((e.clientY - containerRect.top) / containerHeight) * 100;
-      
-      // Calculate pixel values for constraints
-      const topHeightPixels = (newTopHeight / 100) * containerHeight;
-      const bottomHeightPixels = containerHeight - topHeightPixels;
-
-      // Apply constraints
-      if (topHeightPixels >= minTopHeight && bottomHeightPixels >= minBottomHeight) {
-        setTopHeight(newTopHeight);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'row-resize';
-      document.body.style.userSelect = 'none';
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-  }, [isDragging, minTopHeight, minBottomHeight]);
+  const { size: topHeight, isDragging, containerRef, handleMouseDown } = useResizable({
+    defaultSize: defaultTopHeight,
+    minFirstSize: minTopHeight,
+    minSecondSize: minBottomHeight,
+    direction: 'vertical'
+  });
 
   return (
     <div ref={containerRef} className="flex flex-col h-full w-full">
@@ -71,11 +29,21 @@ export default function VerticalResizablePanel({
         onMouseDown={handleMouseDown}
         className={`
           h-1 bg-[var(--border)] hover:bg-[var(--accent)] 
-          cursor-row-resize relative transition-colors flex-shrink-0
-          ${isDragging ? 'bg-[var(--accent)]' : ''}
+          cursor-row-resize relative transition-all duration-200 flex-shrink-0
+          ${
+            isDragging 
+              ? 'bg-[var(--accent)] h-1.5 shadow-lg shadow-[var(--accent)]/50' 
+              : ''
+          }
         `}
       >
         <div className="absolute inset-x-0 -top-1 -bottom-1" />
+        {/* Visual indicator */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="w-1 h-1 rounded-full bg-current" />
+          <div className="w-1 h-1 rounded-full bg-current" />
+          <div className="w-1 h-1 rounded-full bg-current" />
+        </div>
       </div>
 
       {/* Bottom Panel */}

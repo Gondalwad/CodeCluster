@@ -18,9 +18,9 @@ export default function TestResultSection() {
   if (isRunning) {
     return (
       <div className="flex items-center justify-center h-full min-h-[200px]">
-        <div className="text-center">
-          <Spinner size="md" className="mb-3" />
-          <p className="text-sm text-[var(--text)]">Running test cases...</p>
+        <div className="text-center space-y-3">
+          <Spinner size="md" className="mb-3 mx-auto" />
+          <p className="text-sm text-[var(--text)] font-medium">Running test cases...</p>
         </div>
       </div>
     );
@@ -36,7 +36,7 @@ export default function TestResultSection() {
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Status Header */}
       <div className={`p-4 border-b border-[var(--border)] ${
-        isAccepted ? 'bg-green-500 bg-opacity-10' : 'bg-red-500 bg-opacity-10'
+        isAccepted ? 'bg-green-50 dark:bg-green-950/20' : 'bg-red-50 dark:bg-red-950/20'
       }`}>
         <span className={`text-lg font-bold ${
           isAccepted ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
@@ -49,20 +49,20 @@ export default function TestResultSection() {
       </div>
 
       {/* Result Details */}
-      <div className="flex-1 p-4 space-y-4">
+      <div className="flex-1 p-4 space-y-4 bg-[var(--bg)]">
         <CodeBlock label="Input:">{dummyResult.input}</CodeBlock>
         <CodeBlock label="Your Output:">{dummyResult.output}</CodeBlock>
         <CodeBlock label="Expected Output:">{dummyResult.expected}</CodeBlock>
 
         {/* Runtime Info */}
-        <div className="flex gap-4 pt-2">
-          <div className="flex-1">
+        <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="p-3 bg-[var(--code-bg)] rounded-lg border border-[var(--border)] shadow-sm">
             <p className="text-xs text-[var(--text)] opacity-70 mb-1">Runtime</p>
-            <p className="text-sm font-medium text-[var(--text-h)]">{dummyResult.runtime}</p>
+            <p className="text-base font-semibold text-[var(--text-h)]">{dummyResult.runtime}</p>
           </div>
-          <div className="flex-1">
+          <div className="p-3 bg-[var(--code-bg)] rounded-lg border border-[var(--border)] shadow-sm">
             <p className="text-xs text-[var(--text)] opacity-70 mb-1">Memory</p>
-            <p className="text-sm font-medium text-[var(--text-h)]">{dummyResult.memory}</p>
+            <p className="text-base font-semibold text-[var(--text-h)]">{dummyResult.memory}</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useResizable } from '../../../hooks/useResizable';
 
 export default function ResizablePanel({ 
   left, 
@@ -7,57 +7,12 @@ export default function ResizablePanel({
   minLeftWidth = 350,
   minRightWidth = 350
 }) {
-  const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef(null);
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isDragging || !containerRef.current) return;
-
-      const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const containerWidth = containerRect.width;
-      
-      // Calculate new width percentage
-      const newLeftWidth = ((e.clientX - containerRect.left) / containerWidth) * 100;
-      
-      // Calculate pixel values for constraints
-      const leftWidthPixels = (newLeftWidth / 100) * containerWidth;
-      const rightWidthPixels = containerWidth - leftWidthPixels;
-
-      // Apply minimum width constraints (350px or 30%)
-      const minLeftPercent = Math.max((minLeftWidth / containerWidth) * 100, 30);
-      const maxLeftPercent = Math.min(100 - (minRightWidth / containerWidth) * 100, 70);
-
-      if (newLeftWidth >= minLeftPercent && newLeftWidth <= maxLeftPercent) {
-        setLeftWidth(newLeftWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-  }, [isDragging, minLeftWidth, minRightWidth]);
+  const { size: leftWidth, isDragging, containerRef, handleMouseDown } = useResizable({
+    defaultSize: defaultLeftWidth,
+    minFirstSize: minLeftWidth,
+    minSecondSize: minRightWidth,
+    direction: 'horizontal'
+  });
 
   return (
     <div ref={containerRef} className="flex h-full w-full relative">
@@ -74,11 +29,21 @@ export default function ResizablePanel({
         onMouseDown={handleMouseDown}
         className={`
           w-1 bg-[var(--border)] hover:bg-[var(--accent)] 
-          cursor-col-resize relative transition-colors flex-shrink-0
-          ${isDragging ? 'bg-[var(--accent)]' : ''}
+          cursor-col-resize relative transition-all duration-200 flex-shrink-0
+          ${
+            isDragging 
+              ? 'bg-[var(--accent)] w-1.5 shadow-lg shadow-[var(--accent)]/50' 
+              : ''
+          }
         `}
       >
         <div className="absolute inset-y-0 -left-2 -right-2" />
+        {/* Visual indicator */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="w-1 h-1 rounded-full bg-current" />
+          <div className="w-1 h-1 rounded-full bg-current" />
+          <div className="w-1 h-1 rounded-full bg-current" />
+        </div>
       </div>
 
       {/* Right Panel */}

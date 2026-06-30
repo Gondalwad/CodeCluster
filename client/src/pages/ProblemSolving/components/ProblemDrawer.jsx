@@ -17,26 +17,28 @@ export default function ProblemDrawer({ isOpen, onClose, children }) {
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
-          onClick={onClose}
-        />
-      )}
+      <div
+        className={`
+          fixed inset-0 bg-black/50 backdrop-blur-sm z-40 
+          transition-opacity duration-300
+          ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+        `}
+        onClick={onClose}
+      />
 
       {/* Drawer */}
       <div
         className={`
           fixed top-0 left-0 h-full w-[600px] max-w-[90vw]
-          bg-[var(--bg)] shadow-2xl z-50
-          transform transition-transform duration-300 ease-in-out
+          bg-[var(--bg)] shadow-2xl z-50 border-r border-[var(--border)]
+          transform transition-transform duration-300 ease-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-[var(--accent-bg)] text-[var(--text)] transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-lg hover:bg-[var(--accent-bg)] text-[var(--text)] hover:text-[var(--accent)] transition-all duration-200 z-10 shadow-sm"
           aria-label="Close"
         >
           <FaTimes className="text-xl" />

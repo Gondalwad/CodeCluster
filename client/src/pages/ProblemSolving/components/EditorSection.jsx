@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import VerticalResizablePanel from './VerticalResizablePanel';
 import EditorToolbar from './EditorToolbar';
-import EditorContainer from './EditorContainer';
-import TestResultsContainer from './TestResultsContainer';
+import { CodeEditor } from './editor';
+import TestCasePanel from './TestcasePanel';
+import ConsoleOutputPanel from './ConsoleOutputPanel';
 import { LANGUAGE_DEFAULTS } from '../config';
 
 /**
@@ -45,8 +46,12 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
     }, 1500);
   };
 
-  // Sections
-  const editorSection = (
+  const handleCloseOutput = () => {
+    setOutput(null);
+  };
+
+  // Shared editor section
+  const editorContent = (
     <div className="h-full flex flex-col bg-[var(--bg)] overflow-hidden">
       <EditorToolbar
         language={language}
@@ -58,22 +63,28 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
         isRunning={isRunning}
         isSubmitting={isSubmitting}
       />
-      <EditorContainer
-        language={language}
-        code={code}
-        onChange={setCode}
-        isRunning={isRunning}
-      />
+      <div className="flex-1 overflow-hidden">
+        <CodeEditor
+          language={language}
+          code={code}
+          onChange={setCode}
+          disabled={isRunning}
+        />
+      </div>
     </div>
   );
 
-  const testSection = (
+  // Shared test section
+  const testContent = (
     <div className="h-full flex flex-col bg-[var(--bg)] overflow-hidden">
-      <TestResultsContainer
-        testCases={testCases}
-        output={output}
-        isRunning={isRunning}
-      />
+      <div className={`${output || isRunning ? 'flex-1' : 'h-full'} overflow-auto`}>
+        <TestCasePanel testCases={testCases} />
+      </div>
+      {(output || isRunning) && (
+        <div className="flex-1 overflow-auto border-t border-[var(--border)]">
+          <ConsoleOutputPanel output={output} isRunning={isRunning} onClose={handleCloseOutput} />
+        </div>
+      )}
     </div>
   );
 
@@ -82,8 +93,8 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
       {/* Desktop: Vertical resizing */}
       <div className="hidden md:block h-full">
         <VerticalResizablePanel
-          top={editorSection}
-          bottom={testSection}
+          top={editorContent}
+          bottom={testContent}
           defaultTopHeight={60}
           minTopHeight={200}
           minBottomHeight={200}
@@ -92,8 +103,8 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
 
       {/* Mobile: Stacked */}
       <div className="md:hidden h-full flex flex-col">
-        <div className="flex-1">{editorSection}</div>
-        <div className="h-[400px]">{testSection}</div>
+        <div className="flex-1">{editorContent}</div>
+        <div className="h-[400px]">{testContent}</div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import ProblemContentContainer from "./components/ProblemContentContainer";
 
 export default function ProblemSolving() {
   return (
-    <div className="h-screen overflow-hidden bg-[var(--bg)]">
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-[var(--bg)]">
       <ProblemContentContainer />
     </div>
   );
