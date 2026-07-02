@@ -1,5 +1,5 @@
 import { FaTimes } from 'react-icons/fa';
-import { LoadingSpinner } from '../../../components/ui';
+import { LoadingSpinner } from './ui';
 
 /**
  * ConsoleOutputPanel Component

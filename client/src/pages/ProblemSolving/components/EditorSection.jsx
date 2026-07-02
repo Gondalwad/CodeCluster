@@ -3,7 +3,6 @@ import VerticalResizablePanel from './VerticalResizablePanel';
 import EditorToolbar from './EditorToolbar';
 import { CodeEditor } from './editor';
 import TestCasePanel from './TestcasePanel';
-import ConsoleOutputPanel from './ConsoleOutputPanel';
 import { LANGUAGE_DEFAULTS } from '../config';
 
 /**
@@ -13,8 +12,8 @@ import { LANGUAGE_DEFAULTS } from '../config';
  */
 export default function EditorSection({ testCases = [], onToggleProblemList }) {
   // State Management
-  const [language, setLanguage] = useState('javascript');
-  const [code, setCode] = useState(LANGUAGE_DEFAULTS.javascript);
+  const [language, setLanguage] = useState('cpp');
+  const [code, setCode] = useState(LANGUAGE_DEFAULTS.cpp);
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [output, setOutput] = useState(null);
@@ -34,7 +33,7 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
     setOutput(null);
     setTimeout(() => {
       setIsRunning(false);
-      setOutput('Test cases passed: 0/3\n\nPlaceholder for execution results.');
+      setOutput({ status: 'Accepted', passed: 2, total: 3, input: 'nums = [2,7,11,15]\ntarget = 9', output: '[0,1]', expected: '[0,1]', runtime: '68 ms', memory: '44.2 MB' });
     }, 1000);
   };
 
@@ -42,12 +41,8 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      setOutput('Submission successful!\n\nPlaceholder for submission results.');
+      setOutput({ status: 'Accepted', passed: 3, total: 3, input: 'nums = [2,7,11,15]\ntarget = 9', output: '[0,1]', expected: '[0,1]', runtime: '68 ms', memory: '44.2 MB' });
     }, 1500);
-  };
-
-  const handleCloseOutput = () => {
-    setOutput(null);
   };
 
   // Shared editor section
@@ -66,9 +61,9 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
       <div className="flex-1 overflow-hidden">
         <CodeEditor
           language={language}
-          code={code}
+          value={code}
           onChange={setCode}
-          disabled={isRunning}
+          readOnly={isRunning}
         />
       </div>
     </div>
@@ -77,14 +72,7 @@ export default function EditorSection({ testCases = [], onToggleProblemList }) {
   // Shared test section
   const testContent = (
     <div className="h-full flex flex-col bg-[var(--bg)] overflow-hidden">
-      <div className={`${output || isRunning ? 'flex-1' : 'h-full'} overflow-auto`}>
-        <TestCasePanel testCases={testCases} />
-      </div>
-      {(output || isRunning) && (
-        <div className="flex-1 overflow-auto border-t border-[var(--border)]">
-          <ConsoleOutputPanel output={output} isRunning={isRunning} onClose={handleCloseOutput} />
-        </div>
-      )}
+      <TestCasePanel testCases={testCases} output={output} isRunning={isRunning} />
     </div>
   );
 

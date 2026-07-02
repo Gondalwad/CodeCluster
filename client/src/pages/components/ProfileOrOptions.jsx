@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaUser, FaThLarge, FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { isValidToken, signOut } from "../../jsFunctions";
-// import Button from "../ui/Button";
-import Button from "../../components/ui/Button";
+import Button from "../ui/Button";
+// import Button from "./Button";
 
 
 export default function ProfileOrOptions() {

@@ -50,9 +50,9 @@ export default function ProblemContentContainer() {
         </div>
 
         {/* Mobile: Stacked */}
-        <div className="lg:hidden flex flex-col gap-4 h-full overflow-auto p-4">
-          <div className="min-h-[400px]">{problemSection}</div>
-          <div className="min-h-[600px]">{editorSection}</div>
+        <div className="lg:hidden flex flex-col h-full overflow-auto">
+          <div className="min-h-[450px] p-2">{problemSection}</div>
+          <div className="min-h-[700px] p-2">{editorSection}</div>
         </div>
       </div>
     </>

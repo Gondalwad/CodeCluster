@@ -6,7 +6,8 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Service from './pages/Service';
-import ProblemSolving from './pages/ProblemSolving';
+import ProblemSolving from "./pages/ProblemSolving/problemSolver";
+
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Textarea } from '../../../../components/ui';
+import { Textarea } from '../ui';
 
 export default function CustomInputSection() {
   const [customInput, setCustomInput] = useState('');
