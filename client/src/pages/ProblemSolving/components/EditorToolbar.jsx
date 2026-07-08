@@ -1,7 +1,6 @@
 import { FaList, FaRedo } from 'react-icons/fa';
 import { LANGUAGE_OPTIONS } from '../config';
-import { LoadingSpinner , Select} from './ui/index.js';
-// import
+import { LoadingSpinner, Select } from '../../ui';
 
 /**
  * EditorToolbar Component

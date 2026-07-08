@@ -1,3 +1,5 @@
+//created by piyush
+
 export default function Input({ type = 'text', className, placeholder, value, onChange, name }) {
   return (
     <input

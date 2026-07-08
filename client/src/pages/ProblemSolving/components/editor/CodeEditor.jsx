@@ -1,6 +1,5 @@
 import { memo, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { useTheme } from './useTheme';
 
 const CodeEditor = memo(({ 
   language = 'javascript',
@@ -10,8 +9,10 @@ const CodeEditor = memo(({
   height = '100%',
   width = '100%'
 }) => {
-  const theme = useTheme();
-  const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs';
+
+  // theme:
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = isDark ? 'vs-dark' : 'vs';
 
   const handleEditorChange = useCallback((value) => {
     if (onChange) {
@@ -57,7 +58,7 @@ const CodeEditor = memo(({
         language={language}
         value={value}
         onChange={handleEditorChange}
-        theme={monacoTheme}
+        theme={theme}
         options={editorOptions}
         loading={
           <div className="flex items-center justify-center h-full text-[var(--text)]">

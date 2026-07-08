@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { TabButton } from '../ui';
+import { TabButton } from '../../../ui';
 import TestcaseSection from './TestcaseSection';
-import CustomInputSection from './CustomInputSection';
 import TestResultSection from './TestResultSection';
 
 export default function TestcasePanel({ isOpen = true, setIsOpen, testCases = [], output = null, isRunning = false }) {
@@ -15,7 +14,6 @@ export default function TestcasePanel({ isOpen = true, setIsOpen, testCases = []
   const tabs = [
     { id: 'testcase', label: 'Testcase' },
     { id: 'test-result', label: 'Test Result' },
-    { id: 'custom-input', label: 'Custom Input' }
   ];
 
   if (!isOpen) return null;
@@ -38,7 +36,6 @@ export default function TestcasePanel({ isOpen = true, setIsOpen, testCases = []
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'testcase' && <TestcaseSection testCases={testCases} />}
-        {activeTab === 'custom-input' && <CustomInputSection />}
         {activeTab === 'test-result' && <TestResultSection output={output} isRunning={isRunning} />}
       </div>
     </div>

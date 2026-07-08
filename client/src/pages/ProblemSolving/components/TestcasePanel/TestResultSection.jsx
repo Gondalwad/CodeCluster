@@ -1,4 +1,4 @@
-import { CodeBlock, EmptyState, LoadingSpinner } from '../ui';
+import { CodeBlock, EmptyState, LoadingSpinner } from '../../../ui';
 
 export default function TestResultSection({ output = null, isRunning = false }) {
   if (isRunning) {

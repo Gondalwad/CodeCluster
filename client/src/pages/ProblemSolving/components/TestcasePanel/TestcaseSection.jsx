@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, CodeBlock } from '../ui';
+import { Button, CodeBlock } from '../../../ui';
 
 export default function TestcaseSection({ testCases = [] }) {
   const [activeCase, setActiveCase] = useState(0);

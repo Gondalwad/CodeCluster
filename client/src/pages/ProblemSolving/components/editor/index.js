@@ -1,2 +1,1 @@
-export { default as CodeEditor } from './CodeEditor';
-export { useTheme } from './useTheme';
+export { default as CodeEditor } from "./CodeEditor";
