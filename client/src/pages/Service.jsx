@@ -1,10 +1,8 @@
-
 // to be developed by -- urvashi
-export default function About(){
+export default function Service(){
     return (
         <>
-        <h1>About</h1>
+            <h1>Services</h1>
         </>
     )
 }
-
