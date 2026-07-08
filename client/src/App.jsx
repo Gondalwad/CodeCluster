@@ -17,6 +17,7 @@ import Admin from './pages/Dashboards/Admin';
 import Header from './pages/components/Header';
 import Dashboard from './pages/components/Dashboard';
 import DashboardLayout from './pages/components/DashboardLayout';
+import UploadQuestions from './pages/excel-to-json/UploadQuestions.jsx';
 
 function App() {
   return (
@@ -30,18 +31,14 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/service" element={<Service />} />
         <Route path="/problems" element={<ProblemSolving />} />
-        
-        {/* Auth Routes */}
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        
-        {/* Dashboard & Profile Routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/signin" element={<SignUp />} />
+        <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/profile" element={<Profile />} />
-        {/* Note: Admin and DashboardLayout are imported but not currently utilized in these routes */}
-      </Routes>
+        <Route path="/upload" element={<UploadQuestions />} />
+      </Routes>  
     </BrowserRouter>
-  );
+  )
 }
 
 export default App;
