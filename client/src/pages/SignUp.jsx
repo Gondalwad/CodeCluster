@@ -1,6 +1,7 @@
 // developed by ritika...
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function SignUp() {
   const [form, setForm] = useState({
@@ -287,9 +288,7 @@ export default function SignUp() {
         <p className="text-center mt-6 text-gray-600">
           Already have an account?
 
-          <span className="text-indigo-600 font-semibold cursor-pointer hover:underline ml-1">
-            Sign In
-          </span>
+          <Link to="/signin" className="text-indigo-600 font-semibold hover:underline ml-1">Sign In</Link>
 
         </p>
 
