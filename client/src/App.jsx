@@ -18,6 +18,8 @@ import Header from './pages/components/Header';
 import Dashboard from './pages/components/Dashboard';
 import DashboardLayout from './pages/components/DashboardLayout';
 import UploadQuestions from './pages/excel-to-json/UploadQuestions.jsx';
+import ProctoringSession from './proctoring/ProctoringSession';
+import { ExamSession } from './pages/Exam';
 
 function App() {
   return (
@@ -36,6 +38,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/upload" element={<UploadQuestions />} />
+        <Route path="/proctoring-test" element={<ProctoringSession />} />
+        <Route path="/exam" element={<ExamSession />} />
       </Routes>  
     </BrowserRouter>
   )

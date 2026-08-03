@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:proctoring": "node --test src/proctoring/tests/proctoring.test.js",
+    "stub:proctoring": "node proctoring-backend-stub.js"
   },
   "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.3.0",
     "lucide-react": "^1.22.0",
@@ -19,6 +24,7 @@
     "react-router": "^7.17.0",
     "react-router-dom": "^7.17.0",
     "tailwindcss": "^4.3.0",
+    "ws": "^8.21.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
