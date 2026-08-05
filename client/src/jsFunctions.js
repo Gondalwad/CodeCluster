@@ -1,4 +1,5 @@
 // ─── Auth Utilities ────────────────────────────────────────────────────────────
+const baseUrl = "http://localhost:8080";
 
 export function isValidToken() {
   return !!localStorage.getItem("jwt");
@@ -10,15 +11,82 @@ export function signOut() {
   window.location.href = "/home";
 }
 
-export function signIn() {
-  localStorage.setItem("jwt", "This is dummy Token");
-  localStorage.setItem("userType", getUserTyeFromJwt());
-  window.location.href = "/home";
+
+// function to call signIn api
+export async function signIn(preferredId, password) {
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        preferredId,
+        password,
+      }),
+    });
+
+    if (!response.ok) {
+      alert("Invalid username or password");
+      return false;
+    }
+
+    const data = await response.json();
+
+    localStorage.setItem("jwt", `${data.tokenType} ${data.accessToken}`);
+
+    // JWT Claims
+    localStorage.setItem("userType", getUserTypeFromJwt(data.accessToken));
+    localStorage.setItem(
+      "instituteId",
+      getInstituteIdFromJwt(data.accessToken)
+    );
+    localStorage.setItem(
+      "instituteRole",
+      getInstituteRoleFromJwt(data.accessToken)
+    );
+
+    // User Details
+    localStorage.setItem("userId", data.user.id);
+    localStorage.setItem("username", data.user.username);
+    localStorage.setItem("name", data.user.name);
+    localStorage.setItem("email", data.user.email);
+    localStorage.setItem("role", data.user.role);
+    localStorage.setItem("joinedAt",data.user.createdAt);
+    return true;
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert(error.message);
+    return false;
+  }
+}
+/// parseJwt
+
+function parseJwt(token) {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload));
+  } catch (e) {
+    console.error("Invalid JWT", e);
+    return null;
+  }
+}
+// usertype from jwt
+function getUserTypeFromJwt(token) {
+  const payload = parseJwt(token);
+  return payload?.userRole || "";
+}
+// get insituteId from jwt
+function getInstituteIdFromJwt(token) {
+  const payload = parseJwt(token);
+  return payload?.instituteId || "";
+}
+// get institute role from jwt
+function getInstituteRoleFromJwt(token) {
+  const payload = parseJwt(token);
+  return payload?.instituteRole || "";
 }
 
-function getUserTyeFromJwt(){
-  return "Admin";
-}
 
 // ─── Mock API Helpers ──────────────────────────────────────────────────────────
 // Replace the body of each function with a real fetch() call when the backend is ready.
@@ -32,13 +100,12 @@ export function fetchUserProfile() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        id: "u_001",
-        name: "Ramesh Kumar",
-        email: "ramesh.kumar@codecluster.com",
-        role: "admin", // "admin" | "faculty" | "student"
-        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80",
-        institution: "CodeCluster Institute",
-        joinedDate: "2024-01-15",
+        name: localStorage.getItem("name"),
+        email: localStorage.getItem("email"),
+        role: localStorage.getItem("instituteRole"), // "admin" | "faculty" | "student"
+        avatarUrl: "https://media.istockphoto.com/id/1487995045/photo/3d-minimal-identity-verification-success-user-authentication-success-avatar-icon-with.webp?a=1&b=1&s=612x612&w=0&k=20&c=fB6jMGrr5YlOBDyY7RJYl6UyGXws1IC54Izenh-D0Nc=",
+        institution: localStorage.getItem("instituteName").substring(0,9),
+        joinedDate: localStorage.getItem("joinedAt"),
       });
     }, 400);
   });

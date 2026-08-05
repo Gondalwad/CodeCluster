@@ -800,6 +800,10 @@ function SectionRouter({ activeKey, showToast }) {
 
 // ─── Admin root ────────────────────────────────────────────────────────────────
 export default function Admin() {
+    if (!localStorage.getItem("jwt")) {
+        return window.location.href="/Home";
+    }
+    
     const [activeKey, setActiveKey] = useState("batches");
     const [userProfile, setUserProfile] = useState({});
     const [toast, setToast] = useState(null);  // { message, type }

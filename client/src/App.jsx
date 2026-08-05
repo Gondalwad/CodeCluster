@@ -35,7 +35,7 @@ function App() {
         <Route path="/problems" element={<ProblemSolving />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard/>} />
+        <Route path="/dashboard" element={<Admin/>} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/upload" element={<UploadQuestions />} />
         <Route path="/proctoring-test" element={<ProctoringSession />} />
