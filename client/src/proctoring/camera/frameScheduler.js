@@ -2,28 +2,38 @@ import { PROCTORING_CONFIG } from "../config";
 
 class FrameScheduler {
   constructor() {
-    this.intervalId = null;
+    this.running = false;
+    this.timeoutId = null;
   }
 
   start(callback) {
-    if (this.intervalId) return;
-
+    if (this.running) return;
+    this.running = true;
     const interval = 1000 / PROCTORING_CONFIG.streaming.frameRate;
 
-    this.intervalId = setInterval(() => {
-      callback?.();
-    }, interval);
+    const loop = async () => {
+      if (!this.running) return;
+      try {
+        await callback?.();
+      } catch (_) {}
+      if (this.running) {
+        this.timeoutId = setTimeout(loop, interval);
+      }
+    };
+
+    this.timeoutId = setTimeout(loop, interval);
   }
 
   stop() {
-    if (!this.intervalId) return;
-
-    clearInterval(this.intervalId);
-    this.intervalId = null;
+    this.running = false;
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
   }
 
   isRunning() {
-    return this.intervalId !== null;
+    return this.running;
   }
 }
 

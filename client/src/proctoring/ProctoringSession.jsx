@@ -1,20 +1,27 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ProctoringProvider } from "./context/ProctoringContext";
 import useProctoring from "./hooks/useProctoring";
 import WarningPopup from "./components/WarningPopup";
+import CameraPreview from "./components/CameraPreview";
+import useProctoringLogger from "./hooks/useProctoringLogger";
+import { PROCTOR_EVENTS } from "./proctorEvents";
+import cameraManager from "./camera/cameraManager";
+import microphoneManager from "./audio/microphoneManager";
+import frameScheduler from "./camera/frameScheduler";
+import audioStreamer from "./audio/audioStreamer";
 
 export default function ProctoringSession({
   children,
   candidateId = "demo-candidate",
   enabled = false,
-  onTerminate,
+  onGoHome,
 }) {
   const videoRef = useRef(null);
 
-  const proctoring = useProctoring({
-    videoRef,
-    enabled,
-  });
+  const [examTerminated, setExamTerminated] = useState(false);
+  const [finalWarningCount, setFinalWarningCount] = useState(0);
+
+  const proctoring = useProctoring({ videoRef, enabled });
 
   const contextValue = useMemo(
     () => ({
@@ -23,41 +30,49 @@ export default function ProctoringSession({
       connected: proctoring.websocket.connected,
       websocketError: proctoring.websocket.error,
       warning: proctoring.websocket.warning,
-      warningCount: proctoring.websocket.warningCount,
+      warningCount: examTerminated ? finalWarningCount : proctoring.websocket.warningCount,
       violations: proctoring.websocket.violations,
-      terminate: proctoring.websocket.terminate,
+      terminate: examTerminated,
     }),
-    [candidateId, proctoring]
+    [candidateId, proctoring, examTerminated, finalWarningCount]
   );
 
-  const examTerminated = Boolean(contextValue.terminate);
+  useProctoringLogger(enabled);
 
   useEffect(() => {
-    if (examTerminated && onTerminate) {
-      onTerminate();
+    function onTerminateEvent(e) {
+      const count = e.detail?.warning_count ?? 3;
+      setFinalWarningCount(count);
+      setExamTerminated(true);
+      cameraManager.stop();
+      microphoneManager.stop();
+      frameScheduler.stop();
+      audioStreamer.stop();
     }
-  }, [examTerminated, onTerminate]);
+    window.addEventListener(PROCTOR_EVENTS.EXAM_TERMINATED, onTerminateEvent);
+    return () => window.removeEventListener(PROCTOR_EVENTS.EXAM_TERMINATED, onTerminateEvent);
+  }, []);
 
   return (
     <ProctoringProvider value={contextValue}>
       <div className="relative h-full w-full">
-        {/* Hidden video — needed for frame capture, not shown */}
         <video ref={videoRef} autoPlay playsInline muted className="hidden" />
 
-        {/* Exam Terminated Overlay */}
+        {enabled && !examTerminated && <CameraPreview videoRef={videoRef} />}
+
         {examTerminated && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <div className="mx-4 w-full max-w-md rounded-2xl border border-red-500/40 bg-[var(--bg)] p-8 text-center shadow-2xl">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-4xl">
-                🚫
-              </div>
-              <h2 className="text-2xl font-bold text-[var(--text-h)]">Exam Terminated</h2>
-              <p className="mt-2 text-sm text-[var(--text)]">
-                You have reached the maximum warning limit. Your session has been closed.
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75">
+            <div className="mx-4 w-full max-w-sm rounded-lg border border-red-500/30 bg-slate-900 p-6 text-center shadow-xl">
+              <h2 className="text-lg font-bold text-white">Exam Terminated</h2>
+              <p className="mt-2 text-xs text-slate-300">
+                Session ended due to exceeding maximum warnings ({finalWarningCount}/3).
               </p>
-              <div className="mt-5 rounded-lg border border-[var(--border)] bg-[var(--code-bg)] px-4 py-3 text-sm font-semibold text-[var(--text-h)]">
-                Warnings: {contextValue.warningCount ?? 0} / 3
-              </div>
+              <button
+                onClick={onGoHome}
+                className="mt-5 w-full rounded-md bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700 cursor-pointer"
+              >
+                Return to Home
+              </button>
             </div>
           </div>
         )}

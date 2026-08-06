@@ -61,7 +61,7 @@ export default function useProctoring({ videoRef, enabled = false }) {
       cameraManager.stop();
       microphoneManager.stop();
     };
-  }, [enabled, videoRef]);
+  }, [enabled]);
 
   return useMemo(
     () => ({

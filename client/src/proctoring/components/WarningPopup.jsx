@@ -1,74 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import { PROCTOR_EVENTS } from "../proctorEvents";
 
-const WARNING_POPUP_DURATION_MS = 2000;
-const WARNING_GAP_MS = 4000;
+const WARNING_POPUP_DURATION_MS = 3000;
+const WARNING_GAP_MS = 500;
 
 const VIOLATION_META = {
-  "Head turned": {
-    icon: "↩️",
-    message: "Please face the screen directly.",
-  },
-  "Face authentication failed": {
-    icon: "🔐",
-    message: "Face not recognised. Align your face clearly.",
-  },
-  "Face not visible": {
-    icon: "📷",
-    message: "Your face is not visible. Adjust your camera.",
-  },
-  "Mobile phone detected": {
-    icon: "📵",
-    message: "Mobile phone detected. Please remove it from view.",
-  },
-  "Multiple persons detected": {
-    icon: "👥",
-    message: "Multiple people detected. Only you should be in frame.",
-  },
-  "Speech detected": {
-    icon: "🔇",
-    message: "Speech detected. Please remain silent during the exam.",
-  },
-  "Spectacles detected": {
-    icon: "👓",
-    message: "Spectacles detected. Please remove your glasses.",
-  },
-  "Book detected": {
-    icon: "📚",
-    message: "Book detected. Please remove all study materials.",
-  },
-  "Laptop detected": {
-    icon: "💻",
-    message: "Laptop detected. Please remove it from view.",
-  },
-  "Tablet detected": {
-    icon: "📱",
-    message: "Tablet detected. Please remove it from view.",
-  },
-  "Earphones detected": {
-    icon: "🎧",
-    message: "Earphones detected. Please remove them.",
-  },
-  "Headphones detected": {
-    icon: "🎧",
-    message: "Headphones detected. Please remove them.",
-  },
+  "Head turned": "Please face the screen directly.",
+  "Face authentication failed": "Face not recognised. Align your face clearly.",
+  "Face not visible": "Your face is not visible. Adjust your camera.",
+  "Mobile phone detected": "Mobile phone detected. Please remove it from view.",
+  "Multiple persons detected": "Multiple people detected in frame.",
+  "Speech detected": "Speech detected. Please remain silent.",
+  "Spectacles detected": "Spectacles detected. Please remove your glasses.",
+  "Book detected": "Book detected. Please remove all study materials.",
+  "Laptop detected": "Laptop detected. Please remove it from view.",
+  "Tablet detected": "Tablet detected. Please remove it from view.",
+  "Earphones detected": "Earphones detected. Please remove them.",
+  "Headphones detected": "Headphones detected. Please remove them.",
 };
 
-function getMetaForViolation(violation) {
+function getMessageForViolation(violation) {
   if (VIOLATION_META[violation]) return VIOLATION_META[violation];
-  // Handle dynamic banned object labels e.g. "Banned object detected (KNIFE)"
   if (violation?.startsWith("Banned object detected")) {
-    return { icon: "🚫", message: `${violation}. Please remove it from view.` };
+    return `${violation}. Please remove it from view.`;
   }
-  return { icon: "⚠️", message: "Please follow exam guidelines." };
+  return "Please follow exam guidelines.";
 }
 
 export default function WarningPopup() {
   const [warning, setWarning] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [progress, setProgress] = useState(100);
   const timeoutRef = useRef(null);
   const hideTimeoutRef = useRef(null);
+  const progressRef = useRef(null);
   const lastShownRef = useRef(0);
 
   useEffect(() => {
@@ -81,9 +46,19 @@ export default function WarningPopup() {
 
       clearTimeout(timeoutRef.current);
       clearTimeout(hideTimeoutRef.current);
+      clearInterval(progressRef.current);
 
       setWarning(detail);
       setVisible(true);
+      setProgress(100);
+
+      const startTime = Date.now();
+      progressRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 100 - (elapsed / WARNING_POPUP_DURATION_MS) * 100);
+        setProgress(remaining);
+        if (remaining === 0) clearInterval(progressRef.current);
+      }, 30);
 
       timeoutRef.current = setTimeout(() => {
         setVisible(false);
@@ -93,103 +68,42 @@ export default function WarningPopup() {
 
     window.addEventListener(PROCTOR_EVENTS.WARNING_RECEIVED, onWarning);
     return () => {
+      window.removeEventListener(PROCTOR_EVENTS.WARNING_RECEIVED, onWarning);
       clearTimeout(timeoutRef.current);
       clearTimeout(hideTimeoutRef.current);
-      window.removeEventListener(PROCTOR_EVENTS.WARNING_RECEIVED, onWarning);
+      clearInterval(progressRef.current);
     };
   }, []);
 
-  if (!warning) return null;
+  if (!warning || !visible) return null;
 
-  const primaryViolation =
-    Array.isArray(warning.violations) && warning.violations.length > 0
-      ? warning.violations[0]
-      : warning.warning_label || "";
-
-  const meta = getMetaForViolation(primaryViolation);
-  const warningCount = warning.warning_count ?? 0;
-  const isFinal = warningCount >= 3;
+  const violationsList = warning.violations?.length ? warning.violations : [warning.warning_label];
+  const primaryViolation = violationsList[0] || warning.warning_label || "Exam Guideline Violation";
+  const message = getMessageForViolation(primaryViolation);
+  const warningCount = warning.warning_count || 1;
 
   return (
-    <div
-      className={`fixed left-1/2 top-6 z-50 w-[400px] max-w-[calc(100vw-32px)] -translate-x-1/2 transition-all duration-300 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
-      }`}
-    >
-      <div
-        className={`rounded-2xl border shadow-2xl overflow-hidden ${
-          isFinal
-            ? "border-red-500/60 bg-[var(--bg)]"
-            : "border-orange-400/40 bg-[var(--bg)]"
-        }`}
-      >
-        {/* Top accent bar */}
-        <div
-          className={`h-1 w-full ${
-            isFinal
-              ? "bg-gradient-to-r from-red-500 to-red-600"
-              : "bg-gradient-to-r from-orange-400 to-amber-500"
-          }`}
-        />
-
-        <div className="px-5 py-4">
-          {/* Header row */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">{meta.icon}</span>
-              <span
-                className={`text-sm font-bold uppercase tracking-widest ${
-                  isFinal ? "text-red-500" : "text-orange-500"
-                }`}
-              >
-                Warning
-              </span>
-            </div>
-
-            {/* Warning counter pills */}
-            <div className="flex items-center gap-1.5">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                    n <= warningCount
-                      ? isFinal
-                        ? "bg-red-500"
-                        : "bg-orange-400"
-                      : "bg-[var(--border)]"
-                  }`}
-                />
-              ))}
-              <span className="ml-1 text-xs font-semibold text-[var(--text)]">
-                {warningCount} / 3
-              </span>
-            </div>
-          </div>
-
-          {/* Message */}
-          <p className="mt-3 text-base font-semibold text-[var(--text-h)] leading-snug">
-            {meta.message}
-          </p>
-
-          {/* Violation tag */}
-          {primaryViolation && (
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--code-bg)] px-3 py-1 text-xs text-[var(--text)]">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  isFinal ? "bg-red-500" : "bg-orange-400"
-                }`}
-              />
+    <div className="fixed top-6 left-1/2 z-[9999] -translate-x-1/2 select-none">
+      <div className="relative overflow-hidden rounded-lg border border-red-500/40 bg-slate-900 px-5 py-3 shadow-lg">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className="rounded bg-red-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-400">
+              Warning {warningCount} / 3
+            </span>
+            <span className="text-xs font-semibold text-slate-200">
               {primaryViolation}
-            </div>
-          )}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-slate-300">
+            {message}
+          </p>
+        </div>
 
-          {/* Final warning message */}
-          {isFinal && (
-            <p className="mt-3 text-xs font-medium text-red-500">
-              ⚠ This is your final warning. One more violation will terminate
-              your exam.
-            </p>
-          )}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800">
+          <div
+            className="h-full bg-red-500 transition-all duration-75 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     </div>

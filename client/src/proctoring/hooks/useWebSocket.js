@@ -32,9 +32,10 @@ export default function useWebSocket(enabled = false) {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        if (typeof data !== "object" || data === null) return;
         setWarning(data.warning ?? false);
         setWarningCount(data.warning_count ?? 0);
-        setViolations(data.violations ?? []);
+        setViolations(Array.isArray(data.violations) ? data.violations : []);
         setTerminate(data.terminate ?? false);
 
         window.dispatchEvent(new CustomEvent(PROCTOR_EVENTS.WARNING_UPDATED, { detail: data }));
@@ -55,11 +56,15 @@ export default function useWebSocket(enabled = false) {
       }
     };
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       closeRequestedRef.current = true;
       setConnected(false);
       socketRef.current = null;
-      window.dispatchEvent(new CustomEvent(PROCTOR_EVENTS.WEBSOCKET_DISCONNECTED));
+      window.dispatchEvent(
+        new CustomEvent(PROCTOR_EVENTS.WEBSOCKET_DISCONNECTED, {
+          detail: { code: event?.code, reason: event?.reason, wasClean: event?.wasClean },
+        })
+      );
     };
 
     socket.onerror = () => {
@@ -67,7 +72,15 @@ export default function useWebSocket(enabled = false) {
       setError("Unable to connect to backend.");
     };
 
+    // Keep-alive ping every 15s to prevent idle timeout
+    const pingInterval = setInterval(() => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send("ping");
+      }
+    }, 15000);
+
     return () => {
+      clearInterval(pingInterval);
       if (socket?.readyState === WebSocket.OPEN) {
         closeRequestedRef.current = true;
         socket.close();
@@ -78,23 +91,27 @@ export default function useWebSocket(enabled = false) {
 
   const sendFrame = useCallback((blob) => {
     if (socketRef.current?.readyState !== WebSocket.OPEN || !blob) return;
-    // Prefix with 0x01 to identify as video frame
     blob.arrayBuffer().then((buf) => {
+      if (socketRef.current?.readyState !== WebSocket.OPEN) return;
       const tagged = new Uint8Array(buf.byteLength + 1);
       tagged[0] = 0x01;
       tagged.set(new Uint8Array(buf), 1);
-      socketRef.current?.send(tagged);
+      socketRef.current.send(tagged);
     });
   }, []);
 
   const sendAudio = useCallback((audio) => {
     if (socketRef.current?.readyState !== WebSocket.OPEN) return;
-    const pcm = audio instanceof ArrayBuffer ? new Uint8Array(audio) : audio;
-    if (!pcm || pcm.byteLength === 0) return;
-    const tagged = new Uint8Array(1 + pcm.byteLength);
-    tagged[0] = 0x02;
-    tagged.set(pcm, 1);
-    socketRef.current.send(tagged);
+    const toBuffer = audio instanceof Blob ? audio.arrayBuffer() : Promise.resolve(audio);
+    toBuffer.then((buf) => {
+      if (socketRef.current?.readyState !== WebSocket.OPEN) return;
+      const pcm = buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf;
+      if (!pcm || pcm.byteLength === 0) return;
+      const tagged = new Uint8Array(1 + pcm.byteLength);
+      tagged[0] = 0x02;
+      tagged.set(pcm, 1);
+      socketRef.current.send(tagged);
+    });
   }, []);
 
   return { connected, error, warning, warningCount, violations, terminate, sendFrame, sendAudio };
