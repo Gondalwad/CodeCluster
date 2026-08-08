@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 import { FaUser, FaThLarge, FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { isValidToken, signOut } from "../../jsFunctions";
 import Button from "../ui/Button";
+import { FaUniversity } from "react-icons/fa";
+
 // import Button from "./Button";
 
 
@@ -36,13 +38,18 @@ export default function ProfileOrOptions() {
   };
 
   // Easily add, modify, or reorder items in this array to customize the sidebar list
+  const instituteRole = localStorage.getItem("instituteRole");
   const menuItems = [
-    {
-      label: "Dashboard",
-      path: "/dashboard",
-      type: "link",
-      icon: <FaThLarge className="text-lg text-indigo-500" />,
-    },
+     ...(instituteRole
+    ? [
+        {
+          label: "Institute",
+          path: "/dashboard",
+          type: "link",
+          icon: <FaUniversity className="text-lg text-indigo-500" />,
+        },
+      ]
+    : []),
     {
       label: "Profile",
       path: "/profile",
@@ -57,6 +64,7 @@ export default function ProfileOrOptions() {
       className: "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-700 dark:hover:text-red-300",
     },
   ];
+  let profileUrl="https://media.istockphoto.com/id/1487995045/photo/3d-minimal-identity-verification-success-user-authentication-success-avatar-icon-with.webp?a=1&b=1&s=612x612&w=0&k=20&c=fB6jMGrr5YlOBDyY7RJYl6UyGXws1IC54Izenh-D0Nc="
 
   return (
     <>
@@ -69,7 +77,7 @@ export default function ProfileOrOptions() {
             aria-label="User profile options"
           >
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80"
+              src={`${profileUrl}`}
               alt="Profile Avatar"
               className="w-10 h-10 rounded-full object-cover"
             />
@@ -92,7 +100,7 @@ export default function ProfileOrOptions() {
             <div className="p-6 border-b border-(--border) flex items-center justify-between bg-(--bg)">
               <div className="flex items-center gap-3">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80"
+                  src={`${profileUrl}`}
                   alt="Profile Avatar"
                   className="w-10 h-10 rounded-full object-cover border border-(--border)"
                 />

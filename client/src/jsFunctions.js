@@ -52,7 +52,7 @@ export async function signIn(preferredId, password) {
     localStorage.setItem("name", data.user.name);
     localStorage.setItem("email", data.user.email);
     localStorage.setItem("role", data.user.role);
-    localStorage.setItem("joinedAt",data.user.createdAt);
+    localStorage.setItem("joinedAt",data.user.createdAt.substring(0,10));
     return true;
   } catch (error) {
     console.error("Login failed:", error);

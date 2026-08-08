@@ -271,9 +271,9 @@ function AddStudent({ showToast }) {
             <SectionHeading title="Add Student" subtitle="Enrol a new student into a batch." />
             <Card className="max-w-xl">
                 <div className="space-y-4">
-                    <FieldInput label="Full Name" value={form.name} onChange={set("name")} placeholder="e.g. Ananya Sharma" />
+                    {/* <FieldInput label="Full Name" value={form.name} onChange={set("name")} placeholder="e.g. Ananya Sharma" /> */}
                     <FieldInput label="Email" type="email" value={form.email} onChange={set("email")} placeholder="student@example.com" />
-                    <FieldInput label="Batch Name" value={form.batch} onChange={set("batch")} placeholder="e.g. Batch A – 2024" />
+                    {/* <FieldInput label="Batch Name" value={form.batch} onChange={set("batch")} placeholder="e.g. Batch A – 2024" /> */}
                     <ActionButton onClick={handleSubmit} loading={loading}>
                         <FaPlus className="text-xs" /> Add Student
                     </ActionButton>
@@ -381,9 +381,9 @@ function AddFaculty({ showToast }) {
             <SectionHeading title="Add Faculty" subtitle="Register a new faculty member." />
             <Card className="max-w-xl">
                 <div className="space-y-4">
-                    <FieldInput label="Full Name" value={form.name} onChange={set("name")} placeholder="e.g. Dr. Meera Iyer" />
+                    {/* <FieldInput label="Full Name" value={form.name} onChange={set("name")} placeholder="e.g. Dr. Meera Iyer" /> */}
                     <FieldInput label="Email" type="email" value={form.email} onChange={set("email")} placeholder="faculty@example.com" />
-                    <FieldInput label="Department" value={form.department} onChange={set("department")} placeholder="e.g. Computer Science" />
+                    {/* <FieldInput label="Department" value={form.department} onChange={set("department")} placeholder="e.g. Computer Science" /> */}
                     <ActionButton onClick={handleSubmit} loading={loading}>
                         <FaPlus className="text-xs" /> Add Faculty
                     </ActionButton>
@@ -438,34 +438,194 @@ function RemoveFaculty({ showToast }) {
         </div>
     );
 }
-
+/// *********************************** create asseement *************************** ///
 function CreateAssessment({ showToast }) {
-    const [form, setForm] = useState({ title: "", category: "MCQ", duration: "", totalMarks: "" });
+    const [form, setForm] = useState({ title: "", duration: "", totalMarks: "" });
+    const [questions, setQuestions] = useState([]);
+    const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [fetchingQuestions, setFetchingQuestions] = useState(false);
+
+    // Fetch questions from database on mount
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            setFetchingQuestions(true);
+            try {
+                const res = await fetch("http://localhost:8080/api/v1/problems/statement");
+                if (!res.ok) throw new Error("Failed to load question bank.");
+                const data = await res.json();
+                setQuestions(Array.isArray(data) ? data : data.content || []);
+                console.log(data);
+            } catch (err) {
+                showToast("Could not load questions.", "error");
+            } finally {
+                setFetchingQuestions(false);
+            }
+        };
+        fetchQuestions();
+    }, []);
+
     const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
-    const handleSubmit = () => {
-        if (!form.title || !form.duration || !form.totalMarks) return showToast("Please fill all fields.", "error");
-        setLoading(true);
-        // Replace with actual API call
-        setTimeout(() => { setForm({ title: "", category: "MCQ", duration: "", totalMarks: "" }); setLoading(false); showToast("Assessment created!", "success"); }, 600);
+
+    const toggleQuestion = (question) => {
+        const exists = selectedQuestions.some((q) => q.questionId === question.questionId);
+        if (exists) {
+            setSelectedQuestions((prev) => prev.filter((q) => q.questionId !== question.questionId));
+        } else {
+            setSelectedQuestions((prev) => [
+                ...prev,
+                {
+                    questionId: question.questionId,
+                    title: question.title,
+                },
+            ]);
+        }
     };
+
+    const handleMarksChange = (id, newMarks) => {
+        setSelectedQuestions((prev) =>
+            prev.map((q) => (q.questionId === id ? { ...q, marks: newMarks } : q))
+        );
+    };
+
+    const autoCalculateTotalMarks = () => {
+        const total = selectedQuestions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
+        setForm((prev) => ({ ...prev, totalMarks: total.toString() }));
+    };
+
+    const handleSubmit = async () => {
+        if (!form.title || !form.duration || !form.totalMarks) {
+            return showToast("Please fill all assessment fields.", "error");
+        }
+        if (selectedQuestions.length === 0) {
+            return showToast("Please select at least one question.", "error");
+        }
+
+        setLoading(true);
+
+        try {
+            // 1. POST Assessment
+            const assessmentRes = await fetch("http://localhost:8084    /api/v1/assessments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: form.title,
+                    durationMinutes: Number(form.duration),
+                    totalMarks: Number(form.totalMarks),
+                }),
+            });
+
+            if (!assessmentRes.ok) {
+                const errData = await assessmentRes.json().catch(() => ({}));
+                throw new Error(errData.message || "Failed to create assessment.");
+            }
+
+            // Read AssessmentResponse JSON
+            const assessmentData = await assessmentRes.json();
+            const { assessmentId } = assessmentData;
+
+            // 2. POST Questions sequentially/parallelly using assessmentId
+            const questionRequests = selectedQuestions.map((q, index) =>
+                fetch(`http://localhost:8080/api/v1/assessments/${assessmentId}/questions`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        questionId: q.questionId,
+                        displayOrder: index + 1,
+                        marks: Number(q.marks),
+                    }),
+                })
+            );
+
+            const results = await Promise.all(questionRequests);
+            const failed = results.filter((r) => !r.ok);
+
+            if (failed.length > 0) {
+                showToast(`Assessment created, but ${failed.length} question(s) failed to attach.`, "warning");
+            } else {
+                showToast("Assessment and questions successfully created!", "success");
+            }
+
+            setForm({ title: "", duration: "", totalMarks: "" });
+            setSelectedQuestions([]);
+        } catch (error) {
+            showToast(error.message || "An error occurred.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div>
-            <SectionHeading title="Create Assessment" subtitle="Set up a new assessment for your batches." />
-            <Card className="max-w-xl">
-                <div className="space-y-4">
-                    <FieldInput label="Assessment Title" value={form.title} onChange={set("title")} placeholder="e.g. Mid-Term Exam" />
+            <SectionHeading title="Create Assessment" subtitle="Set up a new assessment and select questions from the bank." />
+            <Card className="max-w-2xl">
+                <div className="space-y-6">
+                    <div className="space-y-4">
+                        <FieldInput label="Assessment Title" value={form.title} onChange={set("title")} placeholder="e.g. Mid-Term Exam" />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FieldInput label="Duration (mins)" type="number" value={form.duration} onChange={set("duration")} placeholder="60" />
+                            <div>
+                                <FieldInput label="Total Marks" type="number" value={form.totalMarks} onChange={set("totalMarks")} placeholder="100" />
+                                {selectedQuestions.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={autoCalculateTotalMarks}
+                                        className="text-xs text-indigo-500 underline mt-1 cursor-pointer"
+                                    >
+                                        Auto-sum ({selectedQuestions.reduce((s, q) => s + (Number(q.marks) || 0), 0)} pts)
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-(--text) mb-1.5">Category</label>
-                        <select value={form.category} onChange={set("category")}
-                            className="w-full bg-(--code-bg) border border-(--border) rounded-xl px-4 py-2.5 text-sm text-(--text-h) outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer">
-                            {["MCQ", "Descriptive", "Coding"].map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-(--text) mb-2">
+                            Select Questions ({selectedQuestions.length} selected)
+                        </label>
+
+                        {fetchingQuestions ? (
+                            <p className="text-sm text-gray-500 text-center py-4">Loading questions...</p>
+                        ) : (
+                            <div className="max-h-64 overflow-y-auto space-y-2 border border-(--border) rounded-xl p-2 bg-(--code-bg)">
+                                {questions.map((q) => {
+                                    const selected = selectedQuestions.find((sq) => sq.questionId === q.questionId);
+                                    return (
+                                        <div
+                                            key={q.questionId}
+                                            className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                                                selected ? "bg-indigo-500/10 border-indigo-500" : "border-(--border)"
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => toggleQuestion(q)}>
+                                                <div className={`w-5 h-5 rounded border flex items-center justify-center ${selected ? "bg-indigo-500 text-white" : "border-gray-400"}`}>
+                                                    {selected && <FaCheck className="text-xs" />}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-(--text-h)">{q.title}</p>
+                                                    <span className="text-xs text-gray-400">{q.type} • {q.difficulty}</span>
+                                                </div>
+                                            </div>
+
+                                            {selected && (
+                                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                                    <span className="text-xs text-gray-400">Marks:</span>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={selected.marks}
+                                                        onChange={(e) => handleMarksChange(q.questionId, e.target.value)}
+                                                        className="w-16 bg-(--bg) border border-(--border) rounded px-2 py-1 text-xs"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <FieldInput label="Duration (mins)" type="number" value={form.duration} onChange={set("duration")} placeholder="60" />
-                        <FieldInput label="Total Marks" type="number" value={form.totalMarks} onChange={set("totalMarks")} placeholder="100" />
-                    </div>
+
                     <ActionButton onClick={handleSubmit} loading={loading}>
                         <FaPlus className="text-xs" /> Create Assessment
                     </ActionButton>
@@ -475,6 +635,8 @@ function CreateAssessment({ showToast }) {
     );
 }
 
+
+/// ********************* schedule assements ********************** ///
 function ScheduleAssessment({ showToast }) {
     const [assessments, setAssessments] = useState([]);
     const [loading, setLoading] = useState(true);

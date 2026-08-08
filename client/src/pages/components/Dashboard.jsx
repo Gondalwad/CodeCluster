@@ -8,7 +8,7 @@ import User from "../Dashboards/User"
 export default function Dashboard(){
 
 
-        if(isValidToken && localStorage.getItem('userType') === 'Admin'){
+        if(localStorage.getItem('instituteRole') == 'instructor' || localStorage.getItem('instituteRole') == 'institute_admin'){
             return (<Admin/>)
         }else{
             return (<User/>)
