@@ -2,8 +2,8 @@ import React from "react";
 import Input from "./ui/Input"
 
 export default function Profile() {
-  const [newEmail, setNewEmail] = React.useState("DummyEmail@codecluster.com");
-  const joinedDate = "22-08-2000";
+  const [newEmail, setNewEmail] = React.useState(localStorage.getItem("email"));
+  const joinedDate = localStorage.getItem("joinedAt");
 
 
   return (
@@ -13,7 +13,7 @@ export default function Profile() {
           <div className="relative group">
             <div className="absolute inset-0 bg-indigo-500 rounded-full blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80"
+              src="https://media.istockphoto.com/id/1487995045/photo/3d-minimal-identity-verification-success-user-authentication-success-avatar-icon-with.webp?a=1&b=1&s=612x612&w=0&k=20&c=fB6jMGrr5YlOBDyY7RJYl6UyGXws1IC54Izenh-D0Nc="
               alt="Profile"
               className="relative w-28 h-28 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-md"
             />

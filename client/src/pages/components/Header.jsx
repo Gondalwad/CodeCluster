@@ -5,6 +5,8 @@
 
 import { BrowserRouter, Link } from "react-router";
 import Button from "../ui/Button";
+// import Button from "./Button";
+
 import { FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
 import ProfileOrOptions from "./ProfileOrOptions";
@@ -38,7 +40,7 @@ export default function Header() {
                 absolute
                 top-16
                 left-0
-                
+                z-50
                 bg-indigo-950
                 flex-col
                 w-full
